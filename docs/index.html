@@ -813,11 +813,64 @@
         </div>
     </footer>
 
-    <script>
-        // Simple JavaScript for mobile menu toggle
+ <script>
+        // --- JAVASCRIPT FOR LOADER AND LAZY LOADING ---
+
+        // 1. Loader Logic
+        window.addEventListener('load', () => {
+            const loaderOverlay = document.getElementById('loader-overlay');
+            const mainContent = document.getElementById('main-content');
+            const body = document.body;
+
+            // Simulate a minimum load time for effect (remove in production if not needed)
+            setTimeout(() => {
+                loaderOverlay.classList.add('hidden'); // Fade out loader
+                body.classList.remove('loading'); // Allow main content to become visible
+                // Optional: Remove loader from DOM after transition
+                loaderOverlay.addEventListener('transitionend', () => {
+                    loaderOverlay.remove();
+                }, { once: true });
+            }, 500); // Adjust this delay as needed (e.g., 500ms = 0.5 seconds)
+        });
+
+        // 2. Lazy Loading for Images (Example)
+        // If you add images, give them a 'data-src' attribute instead of 'src'
+        // and add the 'lazy' class.
+        // Example: <img class="lazy" data-src="path/to/image.jpg" alt="Description">
+        document.addEventListener("DOMContentLoaded", function() {
+            const lazyImages = document.querySelectorAll('img.lazy');
+
+            if ('IntersectionObserver' in window) {
+                let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            let lazyImage = entry.target;
+                            lazyImage.src = lazyImage.dataset.src;
+                            lazyImage.removeAttribute('data-src'); // Clean up
+                            lazyImage.classList.add('lazy-loaded');
+                            lazyImageObserver.unobserve(lazyImage);
+                        }
+                    });
+                });
+
+                lazyImages.forEach(function(lazyImage) {
+                    lazyImageObserver.observe(lazyImage);
+                });
+            } else {
+                // Fallback for browsers that don't support IntersectionObserver
+                // Load all lazy images immediately
+                lazyImages.forEach(function(lazyImage) {
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.add('lazy-loaded');
+                });
+            }
+        });
+
+
+        // 3. Simple JavaScript for mobile menu toggle (existing)
         const menuToggle = document.querySelector('.menu-toggle');
         const mainNav = document.querySelector('.main-nav');
-        const headerActions = document.querySelector('.header-actions'); // This now only contains the search bar
+        const headerActions = document.querySelector('.header-actions');
 
         menuToggle.addEventListener('click', () => {
             mainNav.classList.toggle('active');

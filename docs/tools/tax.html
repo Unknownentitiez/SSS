@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tax Optimizer & Wealth Multiplier</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2ff; /* Light blue background */
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      background: #ffffff;
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      max-width: 900px;
+      width: 100%;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50; /* Darker blue-gray */
+      margin-bottom: 25px;
+      font-size: 2.2em;
+      font-weight: 600;
+    }
+    .section-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    .input-section, .results-section, .recommendations-section, .disclaimer-section {
+      padding: 25px;
+      border: 1px solid #dcdcdc;
+      border-radius: 10px;
+      background-color: #fcfdff;
+    }
+    .input-section h3, .results-section h3, .recommendations-section h3, .disclaimer-section h3 {
+      color: #34495e;
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-size: 1.6em;
+      border-bottom: 2px solid #e0e6ed;
+      padding-bottom: 12px;
+    }
+    .input-group {
+      margin-bottom: 22px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #34495e;
+      font-size: 1.05em;
+    }
+    input[type="number"], select {
+      width: calc(100% - 22px); /* Account for padding and border */
+      padding: 12px;
+      border: 1px solid #c8d3e2;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 1.05rem;
+      color: #34495e;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    input[type="number"]:focus, select:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    }
+    .input-help {
+      font-size: 0.85em;
+      color: #7f8c8d;
+      margin-top: 6px;
+      display: block;
+    }
+    .input-error {
+      color: #e74c3c;
+      font-weight: bold;
+      font-size: 0.85em;
+      margin-top: 6px;
+      display: block;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      background: #28a745; /* Green calculate button */
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 1.15rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+    #error-message {
+      margin-top: 20px;
+      color: #e74c3c;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+      background-color: #fdeded;
+      border-radius: 6px;
+      border: 1px solid #e74c3c;
+      display: none; /* Hidden by default */
+    }
+    .results-section, .recommendations-section {
+      display: none; /* Hidden until calculation */
+    }
+    .results-section p, .disclaimer-section p {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: #34495e;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .results-section p strong {
+      color: #2c3e50;
+    }
+    #deductions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    #deductions-table th, #deductions-table td {
+        border: 1px solid #e0e6ed;
+        padding: 10px;
+        text-align: left;
+        font-size: 0.95em;
+        color: #34495e;
+    }
+    #deductions-table thead th {
+        background-color: #e6f2ff; /* Light blue header */
+        font-weight: 600;
+        text-align: center;
+    }
+    #deductions-table tbody td:last-child {
+        text-align: right; /* Align amounts to the right */
+    }
+    .recommendations-section ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    .recommendations-section li {
+        background-color: #e6f2ff; /* Light blue for list items */
+        border: 1px solid #c8d3e2;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 12px;
+        font-size: 1.05em;
+        line-height: 1.5;
+        color: #34495e;
+    }
+    .recommendations-section li strong {
+        color: #007bff;
+    }
+    .recommendations-section li.positive {
+        background-color: #e6ffe6; /* Light green for positive feedback */
+        border-color: #82e082;
+    }
+    .recommendations-section li.info {
+        background-color: #f7f9fc; /* Light gray for info */
+        border-color: #dcdcdc;
+    }
+    .recommendations-section li.warning {
+        background-color: #fffde6; /* Light yellow for warnings */
+        border-color: #ffeb3b;
+    }
+    .recommendations-section li.critical {
+        background-color: #ffe6e6; /* Light red for critical issues */
+        border-color: #ff8282;
+    }
+    .disclaimer-section {
+        margin-top: 30px;
+        background-color: #fff8e1; /* Light yellow background for disclaimer */
+        border-color: #ffecb3;
+        color: #664a00;
+        font-size: 0.9em;
+        padding: 20px;
+        border-left: 5px solid #ffc107;
+    }
+    .disclaimer-section h3 {
+        color: #ffc107;
+        border-bottom: none;
+        margin-bottom: 10px;
+        font-size: 1.3em;
+    }
+    .disclaimer-section p {
+        text-align: left;
+        font-size: 0.95em;
+        line-height: 1.6;
+        color: #664a00;
+    }
+    .back-link {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+      color: #007bff;
+      text-decoration: none;
+      font-size: 1.05rem;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+      color: #0056b3;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      h2 {
+        font-size: 1.8em;
+      }
+      .input-section h3, .results-section h3, .recommendations-section h3, .disclaimer-section h3 {
+        font-size: 1.4em;
+      }
+      button {
+        font-size: 1rem;
+        padding: 14px;
+      }
+      input[type="number"], select {
+        font-size: 1rem;
+        padding: 10px;
+      }
+      .results-section p {
+        font-size: 1em;
+      }
+      .recommendations-section li {
+          font-size: 0.95em;
+          padding: 12px;
+      }
+      .disclaimer-section {
+          font-size: 0.85em;
+      }
+      .section-group {
+          grid-template-columns: 1fr; /* Stack columns on small screens */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      h2 {
+        font-size: 1.5em;
+      }
+      .input-section, .results-section, .recommendations-section, .disclaimer-section {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Tax Optimizer & Wealth Multiplier</h2>
+
+    <div class="input-section">
+      <h3>Your Financial Data (Annual)</h3>
+      <div class="section-group">
+          <div>
+              <h4>Income Details</h4>
+              <div class="input-group">
+                <label for="grossSalary">Annual Gross Salary (₹):</label>
+                <input type="number" id="grossSalary" placeholder="e.g., 800,000" min="0" value="800000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter your **total annual salary** as per your Form 16 or salary slips.
+                    This includes Basic Pay, Dearness Allowance (DA), HRA, Conveyance Allowance, Special Allowance, etc., before any deductions.
+                    *Example: If your monthly gross salary is ₹60,000, enter ₹720,000.*
+                </span>
+                <span class="input-error" id="grossSalary-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="otherIncome">Other Annual Income (₹):</label>
+                <input type="number" id="otherIncome" placeholder="e.g., 20,000 (e.g., FD interest, rent)" min="0" value="20000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter any other income you receive annually that is **taxable**.
+                    This could include:
+                    * **Income from House Property:** Rent received (after deducting municipal taxes, 30% standard deduction).
+                    * **Income from Capital Gains:** Profits from selling shares, mutual funds, property (long-term/short-term).
+                    * **Income from Business or Profession:** Net profit from your self-employment or business.
+                    * **Income from Other Sources:** Interest from fixed deposits (FDs), recurring deposits (RDs), dividends (if taxable), winning from lotteries/gambling.
+                    * *Do NOT include savings account interest here; there's a separate field for that.*
+                </span>
+                <span class="input-error" id="otherIncome-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="savingsInterest">Savings Account Interest Earned (₹):</label>
+                <input type="number" id="savingsInterest" placeholder="e.g., 7,000" min="0" value="7000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the **total interest** you earned from all your savings bank accounts during the financial year.
+                    This is usually shown in your bank statements or Form 26AS.
+                    *Example: If you earned ₹7,000 in savings interest across all accounts, enter ₹7,000.*
+                </span>
+                <span class="input-error" id="savingsInterest-error"></span>
+              </div>
+          </div>
+
+          <div>
+              <h4>Deduction-Eligible Payments & Investments</h4>
+              <div class="input-group">
+                <label for="hraReceived">Annual HRA Received (if salaried) (₹):</label>
+                <input type="number" id="hraReceived" placeholder="e.g., 100,000" min="0" value="100000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the **total House Rent Allowance (HRA)** you received from your employer in the financial year.
+                    This is usually mentioned in your salary slips or Form 16. If you do not receive HRA, enter `0`.
+                </span>
+                <span class="input-error" id="hraReceived-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="rentPaid">Annual Rent Paid (₹):</label>
+                <input type="number" id="rentPaid" placeholder="e.g., 120,000" min="0" value="120000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the **total actual rent** you paid for your residential accommodation during the financial year.
+                    Ensure you have rent receipts to support this claim. If you don't pay rent, enter `0`.
+                </span>
+                <span class="input-error" id="rentPaid-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="isMetro">Are you a Metro City Resident for HRA? (Delhi, Mumbai, Kolkata, Chennai)</label>
+                <select id="isMetro">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+                <span class="input-help">
+                    Select 'Yes' if your rented accommodation is in **Delhi, Mumbai, Kolkata, or Chennai**.
+                    Select 'No' for any other city. This affects the HRA exemption calculation.
+                </span>
+              </div>
+
+              <div class="input-group">
+                <label for="homeLoanPrincipal">Home Loan Principal Paid (₹):</label>
+                <input type="number" id="homeLoanPrincipal" placeholder="e.g., 80,000" min="0" value="80000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the **principal amount** of your housing loan EMI repaid during the financial year.
+                    This is eligible for deduction under **Section 80C**. Check your home loan statement.
+                    *Example: If your EMI is ₹15,000 and ₹7,000 goes to principal, then for 12 months, it's ₹84,000.*
+                </span>
+                <span class="input-error" id="homeLoanPrincipal-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="homeLoanInterest">Home Loan Interest Paid (₹):</label>
+                <input type="number" id="homeLoanInterest" placeholder="e.g., 150,000" min="0" value="150000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the **interest amount** of your housing loan EMI paid during the financial year.
+                    This is eligible for deduction under **Section 24(b)** for self-occupied property (up to ₹2 Lakh).
+                    Check your home loan statement.
+                </span>
+                <span class="input-error" id="homeLoanInterest-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="lifeInsurance80C">Life Insurance & Other 80C Investments (₹):</label>
+                <input type="number" id="lifeInsurance80C" placeholder="e.g., 40,000 (PPF, ELSS, EPF, FDs, etc.)" min="0" value="40000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the total amount invested/paid under **Section 80C**, excluding Home Loan Principal (which has its own field).
+                    This includes:
+                    * **Life Insurance Premiums** (for self, spouse, children)
+                    * **Public Provident Fund (PPF)** contributions
+                    * **Equity-Linked Savings Schemes (ELSS)**
+                    * **Employee Provident Fund (EPF)** contributions
+                    * **5-year Bank Fixed Deposits (Tax Saver FDs)**
+                    * **Sukanya Samriddhi Yojana (SSY)**
+                    * **National Savings Certificate (NSC)**
+                    * **Children's Tuition Fees** (for up to two children, full-time education)
+                    * **Principal repayment of housing loan** (already covered above)
+                    The combined limit for 80C is ₹1,50,000.
+                </span>
+                <span class="input-error" id="lifeInsurance80C-error"></span>
+              </div>
+              
+              <div class="input-group">
+                <label for="medInsuranceSelf">Medical Insurance (Self/Family - excl. parents) (₹):</label>
+                <input type="number" id="medInsuranceSelf" placeholder="e.g., 15,000" min="0" value="15000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the total premium paid for **medical insurance** for yourself, your spouse, and your dependent children.
+                    This is eligible for deduction under **Section 80D**.
+                    The limit is ₹25,000 for non-senior citizens and ₹50,000 for senior citizens (yourself/spouse/children).
+                </span>
+                <span class="input-error" id="medInsuranceSelf-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="isSelfSeniorCitizen">Are you/Spouse/Children Senior Citizen for Med. Insurance?</label>
+                <select id="isSelfSeniorCitizen">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+                <span class="input-help">
+                    Select 'Yes' if the eldest insured person (yourself, spouse, or child) is a **senior citizen** (60 years or above).
+                    This impacts the maximum deduction limit under Section 80D.
+                </span>
+              </div>
+
+              <div class="input-group">
+                <label for="medInsuranceParents">Medical Insurance (Parents) (₹):</label>
+                <input type="number" id="medInsuranceParents" placeholder="e.g., 30,000" min="0" value="30000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the total premium paid for **medical insurance** for your parents.
+                    This is an **additional** deduction under **Section 80D**.
+                    The limit is ₹25,000 if parents are non-senior citizens and ₹50,000 if they are senior citizens.
+                </span>
+                <span class="input-error" id="medInsuranceParents-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="areParentsSeniorCitizen">Are Parents Senior Citizens for Med. Insurance?</label>
+                <select id="areParentsSeniorCitizen">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+                <span class="input-help">
+                    Select 'Yes' if either of your parents is a **senior citizen** (60 years or above).
+                    This impacts the maximum deduction limit for parents under Section 80D.
+                </span>
+              </div>
+
+              <div class="input-group">
+                <label for="npsSelfContribution">NPS (Employee Contribution via 80CCD(1)) (₹):</label>
+                <input type="number" id="npsSelfContribution" placeholder="e.g., 30,000" min="0" value="30000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the total amount you contributed to **National Pension System (NPS)**.
+                    This contribution is eligible for deduction under **Section 80CCD(1)** and falls within the overall ₹1.5 Lakh limit of 80C.
+                    Check your NPS statement or Form 16.
+                </span>
+                <span class="input-error" id="npsSelfContribution-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="npsAdditionalContribution">NPS (Additional Self Contribution via 80CCD(1B)) (₹):</label>
+                <input type="number" id="npsAdditionalContribution" placeholder="e.g., 50,000" min="0" value="50000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter any **additional self-contributed amount** to NPS, *over and above* the amount contributed via 80CCD(1).
+                    This provides an **additional deduction of up to ₹50,000** under **Section 80CCD(1B)**, independent of the 80C limit.
+                </span>
+                <span class="input-error" id="npsAdditionalContribution-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="educationLoanInterest">Education Loan Interest Paid (₹):</label>
+                <input type="number" id="educationLoanInterest" placeholder="e.g., 25,000" min="0" value="25000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the **total interest amount** paid on a loan taken for higher education (for self, spouse, or children).
+                    This is eligible for deduction under **Section 80E**. There is **no upper limit** on the amount, but it can be claimed for a maximum of 8 consecutive years.
+                </span>
+                <span class="input-error" id="educationLoanInterest-error"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="donations80G">Donations (eligible under 80G) (₹):</label>
+                <input type="number" id="donations80G" placeholder="e.g., 10,000" min="0" value="10000" oninput="validateAndClearError(this)" />
+                <span class="input-help">
+                    Enter the total amount of **donations** made to specified funds or charitable institutions.
+                    This is eligible for deduction under **Section 80G**.
+                    * Some donations (e.g., PM National Relief Fund) qualify for 100% deduction.
+                    * Others (e.g., recognized charitable institutions) qualify for 50% deduction.
+                    * Always keep receipts and ensure the institution is approved for 80G.
+                </span>
+                <span class="input-error" id="donations80G-error"></span>
+              </div>
+          </div>
+      </div>
+      <button onclick="calculateTaxAndProfit()">Analyze My Tax & Wealth</button>
+    </div>
+
+    <div id="error-message"></div>
+
+    <div class="results-section" id="summary-results-section">
+      <h3>Your Tax & Financial Snapshot</h3>
+      <div id="summary-results"></div>
+      <h4>Tax Deduction Breakdown</h4>
+      <table id="deductions-table">
+          <thead>
+              <tr>
+                  <th>Section</th>
+                  <th>Description</th>
+                  <th>Amount Claimed</th>
+              </tr>
+          </thead>
+          <tbody>
+              </tbody>
+      </table>
+    </div>
+
+    <div class="recommendations-section" id="recommendations-section">
+      <h3>Tax Saving Opportunities & Wealth Building Advice</h3>
+      <ul id="recommendations-list">
+        </ul>
+    </div>
+
+    <div class="disclaimer-section">
+        <h3>Important Disclaimer</h3>
+        <p>This tool is for informational purposes only and is based on a general understanding of Indian Income Tax laws (as of my last update). It does not constitute financial, tax, or legal advice. Tax laws are complex and may change. Your individual financial situation is unique. Always consult with a qualified financial advisor or tax professional for personalized advice tailored to your specific circumstances.</p>
+    </div>
+
+    <a class="back-link" href="tools.html">← Back to Tools</a>
+  </div>
+
+  <script>
+    // --- Helper Functions ---
+    function formatINR(x) {
+      if (isNaN(x) || x === null || !isFinite(x)) return '₹' + (0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      return '₹' + Math.round(Number(x)).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function validateAndClearError(inputElement) {
+      const value = parseFloat(inputElement.value);
+      const id = inputElement.id;
+      const errorSpan = document.getElementById(`${id}-error`);
+
+      let isValid = true;
+      let errorMessage = '';
+
+      if (inputElement.value.trim() === '') {
+        isValid = false;
+        errorMessage = 'This field cannot be empty.';
+      } else if (isNaN(value)) {
+        isValid = false;
+        errorMessage = 'Please enter a valid number.';
+      } else if (value < parseFloat(inputElement.min || 0)) {
+        isValid = false;
+        errorMessage = `Must be at least ${inputElement.min || 0}.`;
+      } else if (inputElement.max && value > parseFloat(inputElement.max)) {
+        isValid = false;
+        errorMessage = `Must be at most ${inputElement.max}.`;
+      }
+
+      if (!isValid) {
+        inputElement.style.borderColor = '#e74c3c';
+        if (errorSpan) errorSpan.innerText = errorMessage;
+      } else {
+        inputElement.style.borderColor = '#c8d3e2';
+        if (errorSpan) errorSpan.innerText = '';
+      }
+      return isValid;
+    }
+
+    function showOverallError(message) {
+      const errorDiv = document.getElementById('error-message');
+      errorDiv.innerHTML = `<p>${message}</p>`;
+      errorDiv.style.display = 'block';
+      document.getElementById('summary-results-section').style.display = 'none';
+      document.getElementById('recommendations-section').style.display = 'none';
+    }
+
+    function clearOverallError() {
+      document.getElementById('error-message').innerHTML = '';
+      document.getElementById('error-message').style.display = 'none';
+    }
+
+    // --- Main Calculation and Recommendation Logic ---
+    function calculateTaxAndProfit() {
+      clearOverallError();
+
+      let allInputsValid = true;
+      document.querySelectorAll('.input-section input[type="number"]').forEach(input => {
+        if (!validateAndClearError(input)) {
+          allInputsValid = false;
+        }
+      });
+
+      if (!allInputsValid) {
+        showOverallError('Please correct the invalid inputs before analysis.');
+        return;
+      }
+
+      try {
+        const grossSalary = parseFloat(document.getElementById('grossSalary').value);
+        const otherIncome = parseFloat(document.getElementById('otherIncome').value);
+        const savingsInterest = parseFloat(document.getElementById('savingsInterest').value);
+        const hraReceived = parseFloat(document.getElementById('hraReceived').value);
+        const rentPaid = parseFloat(document.getElementById('rentPaid').value);
+        const isMetro = document.getElementById('isMetro').value === 'yes';
+        const homeLoanPrincipal = parseFloat(document.getElementById('homeLoanPrincipal').value);
+        const homeLoanInterest = parseFloat(document.getElementById('homeLoanInterest').value);
+        const lifeInsurance80C = parseFloat(document.getElementById('lifeInsurance80C').value);
+        const medInsuranceSelf = parseFloat(document.getElementById('medInsuranceSelf').value);
+        const isSelfSeniorCitizen = document.getElementById('isSelfSeniorCitizen').value === 'yes';
+        const medInsuranceParents = parseFloat(document.getElementById('medInsuranceParents').value);
+        const areParentsSeniorCitizen = document.getElementById('areParentsSeniorCitizen').value === 'yes';
+        const npsSelfContribution = parseFloat(document.getElementById('npsSelfContribution').value);
+        const npsAdditionalContribution = parseFloat(document.getElementById('npsAdditionalContribution').value);
+        const educationLoanInterest = parseFloat(document.getElementById('educationLoanInterest').value);
+        const donations80G = parseFloat(document.getElementById('donations80G').value);
+
+        let totalDeductions = 0;
+        let deductionsBreakdown = [];
+        let recommendations = [];
+
+        // --- Standard Deduction (for salaried individuals) ---
+        const standardDeduction = Math.min(grossSalary, 50000); // Max 50,000 or actual salary if less
+        totalDeductions += standardDeduction;
+        deductionsBreakdown.push({ section: 'Standard Deduction', description: 'For salaried individuals', amount: standardDeduction });
+
+        // --- HRA Exemption (for salaried individuals) ---
+        let hraExemption = 0;
+        if (grossSalary > 0 && hraReceived > 0 && rentPaid > 0) {
+            const basicSalary = grossSalary * 0.5; // Simplified assumption for basic salary for HRA calculation
+            const actualHRA = hraReceived;
+            const rentPaidMinus10PercentSalary = rentPaid - (basicSalary * 0.10);
+            const fiftyFortyPercentSalary = basicSalary * (isMetro ? 0.50 : 0.40);
+
+            hraExemption = Math.min(actualHRA, rentPaidMinus10PercentSalary, fiftyFortyPercentSalary);
+            hraExemption = Math.max(0, hraExemption); // Ensure it's not negative
+
+            if (hraExemption > 0) {
+                totalDeductions += hraExemption;
+                deductionsBreakdown.push({ section: 'HRA Exemption', description: 'House Rent Allowance', amount: hraExemption });
+            }
+        }
+        if (hraExemption === 0 && grossSalary > 0 && rentPaid > 0 && hraReceived === 0) {
+            recommendations.push({ type: 'warning', text: `<strong>HRA Exemption:</strong> If you are salaried and pay rent but do not receive HRA, you might be eligible for Section 80GG deduction. Consult a tax advisor.` });
+        }
+
+
+        // --- Section 80C, 80CCC, 80CCD(1) ---
+        let eligible80C = homeLoanPrincipal + lifeInsurance80C + npsSelfContribution;
+        // Children's tuition fees are also part of 80C, but not explicitly added as input
+        let deduction80C = Math.min(eligible80C, 150000);
+        totalDeductions += deduction80C;
+        deductionsBreakdown.push({ section: 'Section 80C/80CCC/80CCD(1)', description: 'Life Insurance, PPF, ELSS, Home Loan Principal, NPS (Employee), etc.', amount: deduction80C });
+
+        if (eligible80C < 150000) {
+            let potential80C = 150000 - eligible80C;
+            recommendations.push({ type: 'info', text: `<strong>Section 80C:</strong> You have utilized ${formatINR(deduction80C)} out of ${formatINR(150000)}. You can invest **${formatINR(potential80C)}** more in instruments like ELSS (Equity Linked Savings Schemes), PPF (Public Provident Fund), or Tax Saver Fixed Deposits (5 years) to save more tax.` });
+        } else {
+            recommendations.push({ type: 'positive', text: `<strong>Section 80C:</strong> You have fully utilized your Section 80C limit! Excellent tax planning!` });
+        }
+
+        // --- Section 80CCD(1B) ---
+        let deduction80CCD1B = Math.min(npsAdditionalContribution, 50000);
+        totalDeductions += deduction80CCD1B;
+        deductionsBreakdown.push({ section: 'Section 80CCD(1B)', description: 'Additional NPS Self Contribution', amount: deduction80CCD1B });
+
+        if (npsAdditionalContribution < 50000) {
+            let potentialNPS = 50000 - npsAdditionalContribution;
+            recommendations.push({ type: 'info', text: `<strong>Section 80CCD(1B):</strong> You can make an additional contribution of **${formatINR(potentialNPS)}** to NPS for an extra tax deduction (up to ₹50,000) beyond the 80C limit.` });
+        } else if (npsAdditionalContribution >= 50000) {
+             recommendations.push({ type: 'positive', text: `<strong>Section 80CCD(1B):</strong> You have fully utilized the additional ₹50,000 deduction for NPS. Good job!` });
+        }
+
+
+        // --- Section 24(b) - Home Loan Interest ---
+        let maxHomeLoanInterest = 200000;
+        let deduction24b = Math.min(homeLoanInterest, maxHomeLoanInterest);
+        totalDeductions += deduction24b;
+        deductionsBreakdown.push({ section: 'Section 24(b)', description: 'Interest on Home Loan (Self-Occupied)', amount: deduction24b });
+
+        if (homeLoanInterest > maxHomeLoanInterest) {
+            recommendations.push({ type: 'warning', text: `<strong>Section 24(b):</strong> Your reported home loan interest is ${formatINR(homeLoanInterest)}, but the maximum deduction allowed for self-occupied property is ${formatINR(maxHomeLoanInterest)}. You've utilized the full limit.` });
+        } else if (homeLoanInterest > 0) {
+            recommendations.push({ type: 'positive', text: `<strong>Section 24(b):</strong> You have effectively utilized your home loan interest deduction of ${formatINR(deduction24b)}.` });
+        } else if (homeLoanInterest === 0 && homeLoanPrincipal > 0) {
+             recommendations.push({ type: 'info', text: `<strong>Section 24(b):</strong> You are paying home loan principal but have reported no interest. Ensure you claim interest (if applicable) for self-occupied property up to ${formatINR(maxHomeLoanInterest)} annually.` });
+        }
+
+
+        // --- Section 80D - Medical Insurance ---
+        let maxMedSelf = isSelfSeniorCitizen ? 50000 : 25000; // For self, spouse, children
+        let deductionMedSelf = Math.min(medInsuranceSelf, maxMedSelf);
+        totalDeductions += deductionMedSelf;
+        deductionsBreakdown.push({ section: 'Section 80D (Self/Family)', description: 'Medical Insurance Premium (Self, Spouse, Children)', amount: deductionMedSelf });
+
+        let maxMedParents = areParentsSeniorCitizen ? 50000 : 25000; // For parents
+        let deductionMedParents = Math.min(medInsuranceParents, maxMedParents);
+        totalDeductions += deductionMedParents;
+        deductionsBreakdown.push({ section: 'Section 80D (Parents)', description: 'Medical Insurance Premium (Parents)', amount: deductionMedParents });
+
+        if (medInsuranceSelf === 0 && medInsuranceParents === 0) {
+            recommendations.push({ type: 'critical', text: `<strong>Section 80D (Medical Insurance):</strong> You have not reported any medical insurance premiums. This is a crucial deduction and provides financial security. Consider getting a health insurance policy for yourself/family and parents to claim up to ${formatINR(maxMedSelf)} (self/family) + ${formatINR(maxMedParents)} (parents).` });
+        } else {
+            if (medInsuranceSelf < maxMedSelf) {
+                let potentialMedSelf = maxMedSelf - medInsuranceSelf;
+                recommendations.push({ type: 'info', text: `<strong>Section 80D (Self/Family):</strong> You can potentially claim **${formatINR(potentialMedSelf)}** more by increasing medical insurance premium for yourself/family up to the limit of ${formatINR(maxMedSelf)}.` });
+            } else if (medInsuranceSelf >= maxMedSelf && maxMedSelf > 0) {
+                 recommendations.push({ type: 'positive', text: `<strong>Section 80D (Self/Family):</strong> You have fully utilized your medical insurance deduction for self/family.` });
+            }
+            if (medInsuranceParents < maxMedParents) {
+                let potentialMedParents = maxMedParents - medInsuranceParents;
+                recommendations.push({ type: 'info', text: `<strong>Section 80D (Parents):</strong> You can potentially claim **${formatINR(potentialMedParents)}** more by increasing medical insurance premium for your parents up to the limit of ${formatINR(maxMedParents)}.` });
+            } else if (medInsuranceParents >= maxMedParents && maxMedParents > 0) {
+                recommendations.push({ type: 'positive', text: `<strong>Section 80D (Parents):</strong> You have fully utilized your medical insurance deduction for parents.` });
+            }
+        }
+
+
+        // --- Section 80E - Education Loan Interest ---
+        if (educationLoanInterest > 0) {
+            totalDeductions += educationLoanInterest;
+            deductionsBreakdown.push({ section: 'Section 80E', description: 'Interest on Education Loan', amount: educationLoanInterest });
+            recommendations.push({ type: 'positive', text: `<strong>Section 80E:</strong> You are claiming the full education loan interest of ${formatINR(educationLoanInterest)}. This is a valuable deduction with no upper limit for 8 years.` });
+        } else {
+            recommendations.push({ type: 'info', text: `<strong>Section 80E:</strong> If you are paying interest on an education loan for yourself, spouse, or children, ensure you claim this deduction. There is no upper limit on the amount, but it can be claimed for a maximum of 8 consecutive years.` });
+        }
+
+        // --- Section 80G - Donations ---
+        if (donations80G > 0) {
+            // Simplistic: 50% or 100% of donations are eligible, with certain conditions.
+            // For this tool, we'll use a placeholder for advice, actual calculation is complex for 80G based on type.
+            let deduction80G = donations80G * 0.5; // Example: assuming 50% eligible for deduction purposes
+            // In a real scenario, this would need to check type of donation
+            totalDeductions += deduction80G;
+            deductionsBreakdown.push({ section: 'Section 80G', description: 'Donations to Charitable Institutions (e.g., 50% eligible)', amount: deduction80G });
+            recommendations.push({ type: 'info', text: `<strong>Section 80G:</strong> You have claimed deductions for donations. Remember to keep proper receipts with donor details and PAN to claim them effectively (eligibility varies from 50% to 100% depending on the fund).` });
+        } else {
+             recommendations.push({ type: 'info', text: `<strong>Section 80G:</strong> Consider making donations to approved charitable institutions. You can get tax deductions (50% or 100% of the donated amount, depending on the fund) under this section. Ensure to obtain proper receipts.` });
+        }
+
+
+        // --- Section 80TTA - Savings Account Interest ---
+        let deduction80TTA = Math.min(savingsInterest, 10000);
+        totalDeductions += deduction80TTA;
+        deductionsBreakdown.push({ section: 'Section 80TTA', description: 'Interest from Savings Account', amount: deduction80TTA });
+
+        if (savingsInterest > 10000) {
+            recommendations.push({ type: 'warning', text: `<strong>Section 80TTA:</strong> You earned ${formatINR(savingsInterest)} interest from savings accounts, but the maximum deduction allowed for individuals/HUFs is ${formatINR(10000)}. You've utilized the full limit here.` });
+        } else if (savingsInterest > 0) {
+             recommendations.push({ type: 'positive', text: `<strong>Section 80TTA:</strong> You have claimed deduction for savings account interest. This is a simple but effective way to save tax on up to ${formatINR(10000)} of interest.` });
+        } else {
+             recommendations.push({ type: 'info', text: `<strong>Section 80TTA:</strong> Don't forget to claim deduction for interest earned on your savings bank accounts, up to ${formatINR(10000)} annually.` });
+        }
+
+
+        // --- Calculate Taxable Income ---
+        const grossTotalIncome = grossSalary + otherIncome + savingsInterest; // Gross total income before deductions
+        let taxableIncome = grossTotalIncome - totalDeductions;
+        taxableIncome = Math.max(0, taxableIncome); // Taxable income cannot be negative
+
+        // --- Monetary Profit & Wealth Building Advice (General) ---
+        recommendations.push({ type: 'info', text: `<strong>Financial Planning:</strong> Beyond tax savings, focus on consistent investing for long-term wealth creation. Aim to invest a significant portion of your income, even after maximizing tax-saving avenues.` });
+        recommendations.push({ type: 'info', text: `<strong>Diversify Investments:</strong> Do not limit your investments only to tax-saving instruments. Explore a diversified portfolio including equity mutual funds (for growth), debt funds (for stability), and other asset classes based on your risk appetite.` });
+        recommendations.push({ type: 'info', text: `<strong>Power of Compounding:</strong> Start investing early and consistently. Even small, regular investments can grow substantially over long periods due to the power of compounding. Tools like SIP calculators can help visualize this.` });
+        recommendations.push({ type: 'info', text: `<strong>Review Annually:</strong> Tax laws and your personal financial situation can change. It's crucial to review your tax planning and investment strategy at least once a year, preferably with a professional.` });
+        recommendations.push({ type: 'info', text: `<strong>Emergency Fund:</strong> Ensure you have an adequate emergency fund (3-6 months of living expenses) in an easily accessible, liquid account. This provides a financial safety net before aggressive investing.` });
+
+
+        // Display Summary
+        const summaryResultsDiv = document.getElementById('summary-results');
+        summaryResultsDiv.innerHTML = `
+          <p><strong>Your Gross Total Income:</strong> ${formatINR(grossTotalIncome)}</p>
+          <p><strong>Total Deductions Claimed:</strong> ${formatINR(totalDeductions)}</p>
+          <p><strong>Your Taxable Income:</strong> ${formatINR(taxableIncome)}</p>
+          <p><em>(Note: This does not calculate actual tax liability, only your estimated taxable income after eligible deductions.)</em></p>
+        `;
+        document.getElementById('summary-results-section').style.display = 'block';
+
+        // Display Deductions Table
+        const deductionsTableBody = document.querySelector('#deductions-table tbody');
+        deductionsTableBody.innerHTML = ''; // Clear previous
+        deductionsBreakdown.forEach(deduction => {
+            const row = deductionsTableBody.insertRow();
+            row.insertCell().innerText = deduction.section;
+            row.insertCell().innerText = deduction.description;
+            row.insertCell().innerText = formatINR(deduction.amount);
+        });
+
+        // Display Recommendations
+        const recommendationsList = document.getElementById('recommendations-list');
+        recommendationsList.innerHTML = ''; // Clear previous
+        recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.innerHTML = rec.text;
+            li.classList.add(rec.type);
+            recommendationsList.appendChild(li);
+        });
+        document.getElementById('recommendations-section').style.display = 'block';
+
+      } catch (e) {
+        console.error("An error occurred during calculation:", e);
+        showOverallError(`An unexpected error occurred: ${e.message}. Please check your inputs.`);
+      }
+    }
+
+    // Initial setup on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.input-section input[type="number"]').forEach(input => {
+            validateAndClearError(input);
+        });
+    });
+  </script>
+</body>
+</html>
